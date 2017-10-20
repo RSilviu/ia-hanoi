@@ -7,8 +7,8 @@ def st_finala(SC,SF):
     return SC == SF
 
 def validare(SC,SA,piesa):
-    SP = SA[:piesa]
-    return not (SC[piesa] in SP or SA[piesa] in SP)
+    SP = SA[1:piesa]
+    return not ((SC[piesa] in SP) or (SA[piesa] in SP))
 
 
 # SI = (1,)*4
