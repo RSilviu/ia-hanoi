@@ -3,61 +3,61 @@ from general import *
 
 
 def strategie(SC):
-    npasi = 0
-    # bune si rele?
-    stari = {SC}
-    stari_init = {SC}
-    stari_bune = {SC}
-    stari_inv = dict()
-    stari_moarte = dict()
+    npasi = 0   # incercari totale
+    tranzitii = 0   # tranzitii totale
+    stari_acceptate = 0 #stari totale acceptate
+    stari_valide = [SC]
+    alegeri = dict()
+    stare_noua = True
+    print(SC[1:])
     while not st_finala(SC,SF):
-        # in (1,i) if sc[j] in (i,m+1)=3
-        i = 0
-        # nu muta piesele asezate corect
-        for j in range(1,m+1):
-            if SC[j:] == [3]*(m-j+1):
-                i = j
-                break
-
-        # posibil sa nu pot iesi => bt random n pasi inapoi
+        if stare_noua: i = piesa_urmatoare(SC,m,n)       # nu muta piesele asezate corect
+        # sc -> sa iff mai sunt stari din sc
+        piese_disp = i - 1 if i else m
+        aleg_tot = 1 + (n - 1) * piese_disp
+        tsc = tuple(SC)
+        alegeri[tsc] = alegeri.get(tsc, [SC])
+        if len(alegeri[tsc]) >= aleg_tot:
+            # mergem inapoi random
+            idx_inapoi = randrange(len(stari_valide))
+            print('Inapoi la starea', idx_inapoi)
+            SC = stari_valide[idx_inapoi]
+            stare_noua = True
+            continue
+        piesa,tija=[None]*2
+        SA = None
         repeta = True
         while repeta:
             piesa = randrange(1,i) if i else randrange(1, m + 1)
             tija = randrange(1,n+1)
-            SA = tranzitie(SC,piesa,tija)
-            # print(SA)
             npasi += 1
-            if SA not in stari_moarte.get(tuple(SC),SC):
-                stari[tuple(SC)].append(SA)
+            # alegere = (piesa,tija)
+            # alegeri[tsc] = alegeri.get(tsc,set([(idx,SC[idx]) for idx in range(1,len(SC))]))
+            # if alegere not in alegeri[tsc]:
+            #     alegeri[tsc] |= {alegere}
+            #     repeta = False
+            SA = tranzitie(list(SC), piesa, tija)
+            if SA not in alegeri[tsc]:
+                tranzitii += 1
+                alegeri[tsc].append(SA)
                 repeta = False
-
-        if validare(SC,SA,piesa):
+        if validare(SC,SA,piesa) and (SA not in stari_valide):
+            stari_acceptate += 1
+            stari_valide.append(SA)
             SC = SA
-            print(SC)
-            # stari.append(list(SC))
-            # npasi += 1
-        else:
-            stari_inv |= {SA}
-            # SC = stari[randrange(0,len(stari))]
-
+            stare_noua = True
+            print(SC[1:])
+        else: stare_noua = False   # SA invalida
+            # print('Invalida',SA[1:])
     # print('#stari bune:',len(stari))
-    return npasi
+    return (npasi,tranzitii,stari_acceptate)
 
-n,m = 3,3
+n,m = 4,3
 
 SI = [None]+[1]*m
-SF = [None]+[3]*m
-print(n,'tije,',m,'obiecte,','random (#pasi):',strategie(SI))
-
-
-
-
-
-
-
-
-
-
-
-
+SF = [None]+[n]*m
+print((str(n)+' tije, '+str(m)+' obiecte').center(50))
+print('random'.title().center(50))
+np,tz,sa=strategie(SI)
+print('#incercari:',np,', #tranz:',tz,', #sa:',sa)
 
